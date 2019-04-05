@@ -1,9 +1,11 @@
 package org.anychat.service;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.websocket.EncodeException;
 import javax.websocket.Session;
 
 import org.anychat.action.*;
@@ -259,5 +261,16 @@ public class LoginChatService implements IWSListener, IMsgListener {
 		} else {
 			WSManager.log.info("该链接未登陆，不用走下线流程或者是主动下线");
 		}
+	}
+
+	public static void main(String[] args) throws IOException, EncodeException {
+		ChatUserOnlineS.Builder chatUserOnlineBuilder = ChatUserOnlineS.newBuilder();
+		chatUserOnlineBuilder.setWsOpCode(WsOpCodeChat.USER_ONLINE_S);
+		//chatUserOnlineBuilder.setChatUser();
+		System.out.println(chatUserOnlineBuilder.build());
+
+		WsPacket pt = new WsPacket("tests", chatUserOnlineBuilder.build());
+		Session session = (Session) pt.session;
+		session.getBasicRemote().sendObject(pt);
 	}
 }
