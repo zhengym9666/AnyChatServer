@@ -1,6 +1,7 @@
 package org.anychat.action;
 
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 import org.anychat.dao.base.ChatGroupMapper;
@@ -27,6 +28,13 @@ public class ChatGroupAction {
 			ChatGroupUserCriteria.Criteria criteria = chatGroupUserCriteria.createCriteria();
 			criteria.andUserIdEqualTo(userId);
 			chatGroupList = chatGroupUserMapperExt.selectByExample(chatGroupUserCriteria);
+			Iterator<ChatGroup> iterator = chatGroupList.iterator();
+			while (iterator.hasNext()){
+				ChatGroup next = iterator.next();
+				if(next==null){
+					iterator.remove();
+				}
+			}
 			if (chatGroupList == null) {
 				MybatisManager.log.warn("通过userId:" + userId + "获取聊天组为空");
 			}
