@@ -1,31 +1,13 @@
 package org.anychat.action;/**
  * @ClassName:
- * @Description: TODO
  * @author linyb3
  * @date
  */
 
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
-import org.anychat.config.CommonConfigChat;
 import org.anychat.data.UserData;
 import org.anychat.data.UserGroupData;
-import org.grain.httpclient.HttpUtil;
-import org.grain.websokcetlib.WSManager;
-
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import org.anychat.protobuf.ws.LoginChatProto.ChatUserData;
-/**
- * @ClassName:
- * @Description: TODO
- * @author linyb3
- * @date
- *
- */
 public interface IdentityActionAbs {
     /**
      * 获取用户信息

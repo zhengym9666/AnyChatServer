@@ -21,6 +21,7 @@ import org.anychat.protobuf.ws.LoginChatProto.ChatUserOnlineS;
 import org.anychat.protobuf.ws.LoginChatProto.LoginChatServerC;
 import org.anychat.protobuf.ws.LoginChatProto.LoginChatServerS;
 import org.anychat.tool.StringUtil;
+import org.anychat.util.CommonStatic;
 import org.anychat.ws.WsOpCodeChat;
 import org.grain.msg.IMsgListener;
 import org.grain.msg.MsgPacket;
@@ -89,59 +90,66 @@ public class LoginChatServiceMongodb implements IWSListener, IMsgListener {
 			if (friendList == null || friendList.size() == 0) {
 				return;
 			}
-			/****************************** 初始化公司群 ****************************************/
-			List<ChatGroup> userGroupList = ChatGroupAction.getChatGroupList(userData.getUserGroupTopId());
-			ChatGroup chatGroup = null;
-			if (userGroupList == null || userGroupList.size() == 0) {
-				UserGroupData userGroupData = identityActionAbs.getUserGroup(userData.getUserGroupTopId(), token);
-				if (userGroupData == null) {
-					return;
-				}
-				chatGroup = ChatGroupAction.createChatGroup(userGroupData.getUserGroupName(), userGroupData.getUserGroupId());
-				if (chatGroup == null) {
-					return;
-				}
-				for (int i = 0; i < friendList.size(); i++) {
-					UserData frienduserData = friendList.get(i);
-					ChatGroupUser chatGroupUser = ChatGroupUserAction.createChatGroupUser(frienduserData.getUserId(), chatGroup.getChatGroupId(), null, frienduserData.getUserRole());
-					if (chatGroupUser == null) {
-						WSManager.log.warn("用户id为" + frienduserData.getUserId() + "未加入公司群组");
-					}
-				}
-			} else {
-				chatGroup = userGroupList.get(0);
-				List<ChatGroupUser> chatGroupUserList = ChatGroupUserAction.getChatGroupUserList(null, chatGroup.getChatGroupId());
-				if (chatGroupUserList == null) {
-					return;
-				}
-				if (friendList.size() > chatGroupUserList.size()) {
-					// 插入新增的用户
-					for (int i = 0; i < friendList.size(); i++) {
-						UserData frienduserData = friendList.get(i);
-						boolean isIn = false;
-						for (int j = 0; j < chatGroupUserList.size(); j++) {
-							ChatGroupUser chatGroupUser = chatGroupUserList.get(j);
-							if (frienduserData.getUserId().equals(chatGroupUser.getUserId())) {
-								// 提高遍历效率
-								chatGroupUserList.remove(chatGroupUser);
-								isIn = true;
-								break;
-							}
-						}
-						if (!isIn) {
-							ChatGroupUser chatGroupUser = ChatGroupUserAction.createChatGroupUser(frienduserData.getUserId(), chatGroup.getChatGroupId(), null, frienduserData.getUserRole());
-							if (chatGroupUser == null) {
-								WSManager.log.warn("用户id为" + frienduserData.getUserId() + "未加入公司群组");
-							}
-						}
-					}
-				}
-			}
-			/****************************** 初始化公司群 ****************************************/
-			chatGroupList = ChatGroupAction.getChatGroupListByUserId(userData.getUserId());
-			if (chatGroupList == null) {
-				// 公司群组初始化
-			}
+            //如果是admin管理员默认不获取公司群
+            if(!CommonStatic.ADMIN_CLUB_FLAG.equals(userData.getUserGroupTopId())) {
+
+                    /****************************** 初始化公司群 ****************************************/
+                List<ChatGroup> userGroupList = ChatGroupAction.getChatGroupList(userData.getUserGroupTopId());
+                ChatGroup chatGroup = null;
+                if (userGroupList == null || userGroupList.size() == 0) {
+                    UserGroupData userGroupData = identityActionAbs.getUserGroup(userData.getUserGroupTopId(), token);
+                    if (userGroupData == null) {
+                        return;
+                    }
+                    chatGroup = ChatGroupAction.createChatGroup(userGroupData.getUserGroupName(), userGroupData.getUserGroupId());
+                    if (chatGroup == null) {
+                        return;
+                    }
+                    for (int i = 0; i < friendList.size(); i++) {
+                        UserData frienduserData = friendList.get(i);
+                        ChatGroupUser chatGroupUser = ChatGroupUserAction.createChatGroupUser(frienduserData.getUserId(), chatGroup.getChatGroupId(), null, frienduserData.getUserRole());
+                        if (chatGroupUser == null) {
+                            WSManager.log.warn("用户id为" + frienduserData.getUserId() + "未加入公司群组");
+                        }
+                    }
+                } else {
+                    chatGroup = userGroupList.get(0);
+                    List<ChatGroupUser> chatGroupUserList = ChatGroupUserAction.getChatGroupUserList(null, chatGroup.getChatGroupId());
+                    if (chatGroupUserList == null) {
+                        return;
+                    }
+                    if (friendList.size() > chatGroupUserList.size()) {
+                        // 插入新增的用户
+                        for (int i = 0; i < friendList.size(); i++) {
+                            UserData frienduserData = friendList.get(i);
+                            boolean isIn = false;
+                            for (int j = 0; j < chatGroupUserList.size(); j++) {
+                                ChatGroupUser chatGroupUser = chatGroupUserList.get(j);
+                                if (frienduserData.getUserId().equals(chatGroupUser.getUserId())) {
+                                    // 提高遍历效率
+                                    chatGroupUserList.remove(chatGroupUser);
+                                    isIn = true;
+                                    break;
+                                }
+                            }
+                            if (!isIn) {
+                                ChatGroupUser chatGroupUser = ChatGroupUserAction.createChatGroupUser(frienduserData.getUserId(), chatGroup.getChatGroupId(), null, frienduserData.getUserRole());
+                                if (chatGroupUser == null) {
+                                    WSManager.log.warn("用户id为" + frienduserData.getUserId() + "未加入公司群组");
+                                }
+                            }
+                        }
+                    }
+                }
+                /****************************** 初始化公司群 ****************************************/
+                chatGroupList = ChatGroupAction.getChatGroupListByUserId(userData.getUserId());
+                if (chatGroupList == null) {
+                    // 公司群组初始化
+                }
+            }else{
+                //不需要处理
+                chatGroupList=null;
+            }
 		} else {
 			return;
 		}
@@ -163,6 +171,7 @@ public class LoginChatServiceMongodb implements IWSListener, IMsgListener {
 					continue;
 				}
 				boolean isOnline = false;
+                //检查好友是否在线状态
 				OnlineUserMongodb friendOnlineUser = OnlineUserManagerMongodb.getOnlineUserByUserId(friendUserData.getUserId());
 				if (friendOnlineUser != null) {
 					isOnline = true;

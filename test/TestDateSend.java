@@ -1,9 +1,3 @@
-/**
- * @ClassName:
- * @Description: TODO
- * @author linyb3
- * @date
- */
 
 import net.sf.json.JSONObject;
 import org.anychat.config.CommonConfigChat;
@@ -15,7 +9,6 @@ import java.util.Map;
 
 /**
  * @ClassName:
- * @Description: TODO
  * @author linyb3
  * @date
  *

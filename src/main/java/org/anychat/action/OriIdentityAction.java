@@ -6,6 +6,7 @@ import org.anychat.config.CommonConfigChat;
 import org.anychat.data.UserData;
 import org.anychat.data.UserGroupData;
 import org.anychat.protobuf.ws.LoginChatProto.ChatUserData;
+import org.anychat.util.CommonStatic;
 import org.grain.httpclient.HttpUtil;
 import org.grain.websokcetlib.WSManager;
 
@@ -113,8 +114,15 @@ public class OriIdentityAction implements IdentityActionAbs{
 		Map<String, String> header = new HashMap<>();
 		header.put("hOpCode", "3");
 		header.put("token", token);
-
-		byte[] returnByte = HttpUtil.send(js.toString(), CommonConfigChat.ORIIDENTITY_URL+"/club/queryStudentClub.action", header, HttpUtil.POST);
+        byte[] returnByte=null;
+        //增加判断管理员的，获取所有社团
+        //TODO
+        //如果是超级管理员表示，默认获取所有社团
+        if(userGroupId!=null && userGroupId==CommonStatic.ADMIN_CLUB_FLAG){
+            returnByte = null;
+        }else{
+            returnByte = HttpUtil.send(js.toString(), CommonConfigChat.ORIIDENTITY_URL+"/club/queryStudentClub.action", header, HttpUtil.POST);
+        }
 		if (returnByte != null) {
 			String str = null;
 			try {
